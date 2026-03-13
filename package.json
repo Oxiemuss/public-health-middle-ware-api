@@ -1,41 +1,27 @@
 {
-  "name": "public-health-middle-ware",
-  "version": "0.0.0",
+  "name": "public-health-middle-ware-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:public-health-middle-ware": "node dist/public-health-middle-ware/server/server.mjs"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "private": true,
-  "packageManager": "npm@11.6.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oxiemuss/public-health-middle-ware.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Oxiemuss/public-health-middle-ware/issues"
+  },
+  "homepage": "https://github.com/Oxiemuss/public-health-middle-ware#readme",
   "dependencies": {
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@angular/platform-server": "^21.2.0",
-    "@angular/router": "^21.2.0",
-    "@angular/ssr": "^21.2.1",
-    "express": "^5.1.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
-  },
-  "devDependencies": {
-    "@angular/build": "^21.2.1",
-    "@angular/cli": "^21.2.1",
-    "@angular/compiler-cli": "^21.2.0",
-    "jsdom": "^28.0.0",
-    "postcss": "^8.5.3",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^4.1.12",
-    "@tailwindcss/postcss": "^4.1.12",
-    "typescript": "~5.9.2",
-    "@types/express": "^5.0.1",
-    "@types/node": "^20.17.19",
-    "vitest": "^4.0.8"
+    "@supabase/supabase-js": "^2.99.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
   }
 }
