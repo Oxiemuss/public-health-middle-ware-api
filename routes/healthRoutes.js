@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const healthCon = require("../controllers/healthCon");
 
-// router.get("/", healthCon.getAllHealthCenters); // ดึงทั้งหมด
-router.post("/add", healthCon.addHealthCenter);    // เพิ่มหน่วยบริการ
+router.post("/add", healthCon.addHealthCenter);    
+router.get("/list", healthCon.getAllHealthCenters);
+router.post("/info", healthCon.getHealthCenterById);
+
 module.exports = router;

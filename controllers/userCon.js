@@ -29,19 +29,22 @@ exports.getAllUsers = async (req, res) => {
     const { data, error } = await supabase
         .from('user_profiles')
         .select(`
-            full_name,
+            *,
             health_centers (
                 h_name
             )
-        `);
+        `) // ใช้ *, ตามด้วยชื่อตารางที่ต้องการ Join
+        .order('hcode', { ascending: true });
 
     if (error) {
         return res.status(400).json({ error: error.message });
     }
 
-    // ปรับโครงสร้างข้อมูลเล็กน้อยให้อ่านง่ายขึ้น (Flatten)
+    // ปรับโครงสร้างข้อมูล (Flatten)
     const result = data.map(user => ({
         full_name: user.full_name,
+        hcode: user.hcode, // ดึงมาได้เพราะใช้ *
+        role: user.role,   // ดึงมาได้เพราะใช้ *
         hospital_name: user.health_centers ? user.health_centers.h_name : 'ไม่ระบุสังกัด'
     }));
 
