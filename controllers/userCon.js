@@ -50,6 +50,7 @@ exports.getAllUsers = async (req, res) => {
     res.json(result);
 };
 
+
 exports.delUser = async (req, res) => {
     try {
         const { user_name } = req.body; // รับ user_name จาก Body
@@ -82,31 +83,52 @@ exports.updateUser = async (req, res) => {
     try {
         const { user_name, full_name, hcode, role, is_active } = req.body;
 
+        // 1. ตรวจสอบว่ามี user_name มาเพื่อใช้เป็น Key ในการค้นหาหรือไม่
         if (!user_name) {
             return res.status(400).json({ error: "กรุณาระบุ user_name ที่ต้องการแก้ไข" });
         }
 
+        const updateData = {};
+
+        // 2. ตรวจสอบข้อมูล: ถ้าไม่ใช่ undefined และไม่ใช่ค่าว่าง ("") ให้เตรียมอัปเดต
+        // hcode ตรงนี้จะสามารถอัปเดตเปลี่ยนค่าได้แล้ว
+        if (full_name !== undefined && full_name !== "") updateData.full_name = full_name;
+        if (hcode !== undefined && hcode !== "") updateData.hcode = hcode;
+        if (role !== undefined && role !== "") updateData.role = role;
+        
+        // สำหรับ Boolean (is_active) เช็คแค่ว่ามีการส่งค่ามาหรือไม่
+        if (is_active !== undefined) updateData.is_active = is_active;
+
+        updateData.updated_at = new Date();
+
+        // 3. ถ้าไม่มีข้อมูลอะไรส่งมาเลยนอกจาก user_name ก็ไม่ต้องอัปเดต
+        if (Object.keys(updateData).length <= 1) {
+            return res.status(400).json({ error: "ไม่มีข้อมูลใหม่สำหรับการอัปเดต" });
+        }
+
         const { data, error } = await supabase
             .from('user_profiles')
-            .update({ 
-                full_name: full_name, 
-                hcode: hcode, 
-                role: role,
-                is_active: is_active, // เพิ่มการอัปเดตสถานะตามภาพ Schema
-                updated_at: new Date() // อัปเดตเวลาที่แก้ไข
-            })
-            .eq('user_name', user_name) // ค้นหาด้วย user_name
+            .update(updateData)
+            .eq('user_name', user_name) // ใช้ user_name ในการระบุตัวคนที่จะแก้
             .select();
 
         if (error) {
+            // ดัก Error กรณีเปลี่ยน hcode เป็นรหัสที่ไม่มีอยู่จริงในตาราง HC
+            if (error.code === '23503') {
+                return res.status(400).json({ error: "รหัส hcode ที่ระบุไม่มีอยู่ในระบบ" });
+            }
             return res.status(400).json({ error: error.message });
         }
 
         if (data.length === 0) {
-            return res.status(404).json({ error: "ไม่พบข้อมูลผู้ใช้งานนี้" });
+            return res.status(404).json({ error: "ไม่พบข้อมูลผู้ใช้งานชื่อนี้" });
         }
 
-        res.json({ message: "อัปเดตข้อมูลสำเร็จ", updatedData: data[0] });
+        res.json({ 
+            message: "อัปเดตข้อมูลสำเร็จ", 
+            updatedFields: Object.keys(updateData).filter(k => k !== 'updated_at'),
+            updatedData: data[0] 
+        });
     } catch (err) {
         res.status(500).json({ error: "Internal Server Error" });
     }
