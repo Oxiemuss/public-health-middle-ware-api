@@ -26,5 +26,11 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-// Export app เพื่อให้ Vercel เอาไปใช้งานแบบ Serverless
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:4200', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 module.exports = app;
