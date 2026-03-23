@@ -39,54 +39,70 @@ exports.getAllRefer = async (req, res) => {
 
 exports.addRefer = async (req, res) => {
     try {
-        // ข้อมูลตัวอักษรจะอยู่ใน req.body
+        // 1. แกะข้อมูลจาก req.body
         const { 
             cid, full_name, birth_date, tel, from_hcode, to_hcode,
             rlt_name, rlt_contact_number, status 
         } = req.body;
 
-        if (!cid || !full_name || !from_hcode || !to_hcode) {
-            return res.status(400).json({ error: "กรุณากรอกข้อมูลสำคัญให้ครบ" });
+        // เช็คข้อมูลสำคัญ (เอา cid ออกจากการบังคับถ้าพี่ไม่ซีเรียสเรื่องเลข 13 หลัก)
+        if (!full_name || !from_hcode || !to_hcode) {
+            return res.status(400).json({ error: "กรุณากรอกข้อมูลสำคัญให้ครบ (ชื่อ, รหัสสถานพยาบาล)" });
         }
 
         let refer_pic_path = null;
         let cid_card_pic_path = null;
 
-        // --- ส่วนที่ 1: จัดการอัปโหลดรูปภาพ (ถ้ามีไฟล์ส่งมา) ---
+        // --- ส่วนที่ 1: อัปโหลดรูปภาพ ---
         if (req.files) {
-            // อัปโหลดรูปใบส่งตัว
-            if (req.files.refer_pic) {
-                const file = req.files.refer_pic[0];
+            // รูปใบส่งตัว (ดึงจากชื่อ 'refer_pic' ตาม Payload)
+            if (req.files['refer_pic'] && req.files['refer_pic'][0]) {
+                const file = req.files['refer_pic'][0];
                 const fileExt = file.originalname.split('.').pop();
-                const fileName = `refer_${cid}_${Date.now()}.${fileExt}`;
+                const fileName = `refer_${cid || 'no-id'}_${Date.now()}.${fileExt}`;
                 
                 const { data, error: uploadError } = await supabase.storage
-                    .from('refer-images') // ชื่อ Bucket ใน Supabase
-                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+                    .from('refer-images')
+                    .upload(fileName, file.buffer, { 
+                        contentType: file.mimetype,
+                        upsert: true 
+                    });
 
-                if (!uploadError) refer_pic_path = data.path;
+                if (uploadError) {
+                    console.error("Upload Refer Pic Error:", uploadError);
+                } else {
+                    refer_pic_path = data.path;
+                }
             }
 
-            // อัปโหลดรูปบัตรประชาชน
-            if (req.files.cid_card_pic) {
-                const file = req.files.cid_card_pic[0];
+            // รูปบัตรประชาชน (ดึงจากชื่อ 'cid_card_pic' ตาม Payload)
+            if (req.files['cid_card_pic'] && req.files['cid_card_pic'][0]) {
+                const file = req.files['cid_card_pic'][0];
                 const fileExt = file.originalname.split('.').pop();
-                const fileName = `cid_${cid}_${Date.now()}.${fileExt}`;
+                const fileName = `cid_${cid || 'no-id'}_${Date.now()}.${fileExt}`;
 
                 const { data, error: uploadError } = await supabase.storage
                     .from('refer-images')
-                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+                    .upload(fileName, file.buffer, { 
+                        contentType: file.mimetype,
+                        upsert: true 
+                    });
 
-                if (!uploadError) cid_card_pic_path = data.path;
+                if (uploadError) {
+                    console.error("Upload CID Pic Error:", uploadError);
+                } else {
+                    cid_card_pic_path = data.path;
+                }
             }
         }
 
         // --- ส่วนที่ 2: บันทึกลงตาราง referrals ---
+        // หมายเหตุ: ตัด 'address' ออกตามที่พี่บอกว่าใน DB ไม่มี
         const { data, error } = await supabase
             .from('referrals')
             .insert([
                 { 
-                    cid, 
+                    cid: cid || null, 
                     full_name, 
                     birth_date, 
                     tel, 
@@ -95,8 +111,8 @@ exports.addRefer = async (req, res) => {
                     rlt_name, 
                     rlt_contact_number, 
                     status: status || 'pending',
-                    refer_pic_path,     // ใช้ Path ที่ได้จากการอัปโหลดข้างบน
-                    cid_card_pic_path,  // ใช้ Path ที่ได้จากการอัปโหลดข้างบน
+                    refer_pic_path, 
+                    cid_card_pic_path,
                     created_at: new Date(),
                     updated_at: new Date() 
                 }
@@ -104,19 +120,23 @@ exports.addRefer = async (req, res) => {
             .select();
 
         if (error) {
-            if (error.code === '23503') return res.status(400).json({ error: "รหัสสถานพยาบาลไม่ถูกต้อง" });
+            console.error("Supabase Insert Error:", error);
+            if (error.code === '23503') return res.status(400).json({ error: "รหัสสถานพยาบาลไม่ถูกต้อง (Foreign Key Error)" });
             return res.status(400).json({ error: error.message });
         }
 
         res.status(201).json({
-            message: "บันทึกข้อมูลและอัปโหลดรูปภาพสำเร็จ",
-            refer_id: data[0].rid,
+            message: "บันทึกข้อมูลสำเร็จ",
+            refer_id: data[0]?.rid || data[0]?.id, // ปรับตามชื่อ PK ของพี่
             data: data[0]
         });
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Critical Controller Error:", err);
+        res.status(500).json({ 
+            error: "Internal Server Error", 
+            details: err.message 
+        });
     }
 };
 

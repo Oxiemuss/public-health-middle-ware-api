@@ -12,8 +12,8 @@ router.get("/list", referCon.getAllRefer);
 router.post("/update", referCon.updateRefer);
 router.post("/del", referCon.delRefer);
 router.post('/add', upload.fields([
-  { name: 'refer_pic_path', maxCount: 1 },
-  { name: 'cid_card_pic_path', maxCount: 1 }
+  { name: 'refer_pic', maxCount: 1 },
+  { name: 'cid_card_pic', maxCount: 1 }
 ]), referCon.addRefer);
 
 
