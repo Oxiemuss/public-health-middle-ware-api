@@ -116,7 +116,7 @@ exports.addRefer = async (req, res) => {
           full_name,
           birth_date: birth_date || null,
           tel,
-          address: p_address,
+          p_address,
           from_hcode,
           to_hcode,
           rlt_name,
