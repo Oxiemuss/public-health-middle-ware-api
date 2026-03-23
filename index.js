@@ -8,7 +8,7 @@ const app = express();
 
 // --- 1. การตั้งค่า Middleware (รวม CORS ไว้ที่เดียว) ---
 app.use(cors({
-  origin: ['http://localhost:4200', 'https://your-frontend-domain.vercel.app'], // เพิ่ม URL หน้าบ้านของคุณที่นี่
+  origin: ['http://localhost:4200/*', 'https://your-frontend-domain.vercel.app'], // เพิ่ม URL หน้าบ้านของคุณที่นี่
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
