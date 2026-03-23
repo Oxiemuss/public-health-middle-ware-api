@@ -21,7 +21,8 @@ exports.getAllRefer = async (req, res) => {
             patient_name: item.full_name,
             birth_date: item.birth_date,
             tel: item.tel,
-            from_hcode: item.from_hcode,
+            address: item.p_address,
+            from_hcode4: item.from_hcode,
             from_hospital_name: item.from_hospital ? item.from_hospital.h_name : 'ไม่ทราบต้นทาง',
             to_hcode: item.to_hcode,
             to_hospital_name: item.to_hospital ? item.to_hospital.h_name : 'ไม่ทราบปลายทาง',
@@ -40,7 +41,7 @@ exports.getAllRefer = async (req, res) => {
 exports.addRefer = async (req, res) => {
     try {
         const { 
-            cid, full_name, birth_date, tel, from_hcode, to_hcode,
+            cid, full_name, birth_date, tel,p_address,from_hcode,to_hcode,
             rlt_name, rlt_contact_number, status 
         } = req.body;
 
@@ -100,7 +101,8 @@ exports.addRefer = async (req, res) => {
                     cid: cid || null, 
                     full_name, 
                     birth_date: birth_date || null, 
-                    tel, 
+                    tel,
+                    p_address, 
                     from_hcode, 
                     to_hcode, 
                     rlt_name, 
@@ -141,7 +143,8 @@ exports.updateRefer = async (req, res) => {
             cid, 
             full_name, 
             birth_date, 
-            tel, 
+            tel,
+            p_address, 
             from_hcode, 
             to_hcode,
             rlt_name,               
@@ -164,6 +167,7 @@ exports.updateRefer = async (req, res) => {
         if (full_name !== undefined && full_name !== "") updateData.full_name = full_name;
         if (birth_date !== undefined && birth_date !== "") updateData.birth_date = birth_date;
         if (tel !== undefined && tel !== "") updateData.tel = tel;
+        if (p_address !== undefined && p_address !== "") updateData.p_address = p_address;
         if (from_hcode !== undefined && from_hcode !== "") updateData.from_hcode = from_hcode;
         if (to_hcode !== undefined && to_hcode !== "") updateData.to_hcode = to_hcode;
         if (rlt_name !== undefined && rlt_name !== "") updateData.rlt_name = rlt_name;
