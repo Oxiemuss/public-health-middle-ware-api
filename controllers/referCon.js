@@ -33,6 +33,7 @@ exports.getAllRefer = async (req, res) => {
       refer_pic: item.refer_pic_path || item.refer_pic, 
       cid_pic: item.cid_card_pic_path || item.cid_card_pic,
       created_at: item.created_at,
+      is_active: item.is_active,
     }));
 
     res.json(result);
