@@ -9,6 +9,7 @@ const upload = multer({
 });
 
 router.get("/list", referCon.getAllRefer);
+router.get("/his", referCon.getHisRefer);
 router.post("/update", referCon.updateRefer);
 router.post("/del", referCon.delRefer);
 router.post('/add', upload.fields([

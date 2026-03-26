@@ -25,11 +25,58 @@ exports.getAllRefer = async (req, res) => {
       tel: item.tel,
       p_address: item.p_address, // 🟢 แก้ไข: เติม item. นำหน้า
       from_hcode: item.from_hcode, // (แก้ชื่อให้สื่อสารง่ายขึ้น)
+      rlt_name: item.rlt_name,
+      rlt_contact_number: item.rlt_contact_number,
       from_hospital_name: item.from_hospital?.h_name || "ไม่ทราบต้นทาง",
       to_hcode: item.to_hcode,
       to_hospital_name: item.to_hospital?.h_name || "ไม่ทราบปลายทาง",
       status: item.status,
       // 🟢 ตรวจสอบชื่อ column ใน DB อีกทีนะครับ ว่าเป็นชื่อนี้จริงไหม
+      refer_pic: item.refer_pic_path || item.refer_pic, 
+      cid_pic: item.cid_card_pic_path || item.cid_card_pic,
+      created_at: item.created_at,
+      is_active: item.is_active,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    // 🟢 ใส่ console.error เพื่อดูว่ามันพังที่บรรทัดไหนใน Terminal
+    console.error("🔥 Server Error:", err); 
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
+  }
+};
+
+
+exports.getHisRefer = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("referrals")
+      .select(`
+        *,
+        from_hospital:health_centers!referrals_from_hcode_fkey ( h_name ),
+        to_hospital:health_centers!referrals_to_hcode_fkey ( h_name )
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Supabase Error:", error);
+      return res.status(400).json({ error: error.message });
+    }
+
+    const result = data.map((item) => ({
+      rid: item.rid,
+      cid: item.cid,
+      patient_name: item.full_name,
+      birth_date: item.birth_date,
+      tel: item.tel,
+      p_address: item.p_address, 
+      from_hcode: item.from_hcode, 
+      rlt_name: item.rlt_name,
+      rlt_contact_number: item.rlt_contact_number,
+      from_hospital_name: item.from_hospital?.h_name || "ไม่ทราบต้นทาง",
+      to_hcode: item.to_hcode,
+      to_hospital_name: item.to_hospital?.h_name || "ไม่ทราบปลายทาง",
+      status: item.status,
       refer_pic: item.refer_pic_path || item.refer_pic, 
       cid_pic: item.cid_card_pic_path || item.cid_card_pic,
       created_at: item.created_at,
