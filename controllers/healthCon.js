@@ -1,7 +1,7 @@
 const supabase = require('../supabaseClient');
 
 exports.addHealthCenter = async (req, res) => {
-    const { hcode, h_name, role, h_district, h_province, contact_number } = req.body;
+    const { hcode, h_name, role, h_tumbol, h_district, h_province, contact_number } = req.body;
 
     if (!hcode || !h_name || !role) {
         return res.status(400).json({ error: "กรุณาระบุ hcode, h_name และ role ให้ครบถ้วน" });
@@ -11,6 +11,7 @@ exports.addHealthCenter = async (req, res) => {
         .from('health_centers')
         .insert([{ 
             hcode, h_name, role, 
+            h_tumbol: h_tumbol , 
             h_district: h_district || 'บางปลาม้า', 
             h_province: h_province || 'สุพรรณบุรี', 
             contact_number, 
@@ -72,7 +73,8 @@ exports.updateHealthCenter = async (req, res) => {
             hcode,      // hcode ตัวเดิม (บังคับส่งมาเพื่อใช้หา Record)
             new_hcode,  // hcode ตัวใหม่ (ถ้าอยากเปลี่ยนเลขรหัส)
             h_name, 
-            role, 
+            role,
+            h_tumbol, 
             h_district, 
             h_province, 
             contact_number, 
@@ -90,6 +92,7 @@ exports.updateHealthCenter = async (req, res) => {
         
         if (h_name !== undefined && h_name !== "") updateData.h_name = h_name;
         if (role !== undefined && role !== "") updateData.role = role;
+        if (h_tumbol !== undefined && h_tumbol !== "") updateData.h_tumbol;
         if (h_district !== undefined && h_district !== "") updateData.h_district = h_district;
         if (h_province !== undefined && h_province !== "") updateData.h_province = h_province;
         if (contact_number !== undefined && contact_number !== "") updateData.contact_number = contact_number;
