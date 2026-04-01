@@ -3,6 +3,7 @@ const cors = require('cors');
 const healthRoutes = require("./routes/healthRoutes");
 const userRoutes = require("./routes/userRoutes");
 const referRouters = require("./routes/referRoutes");
+const authRouters = require("./routes/authRoutes");
 
 const app = express();
 
@@ -23,6 +24,8 @@ app.get("/", (req, res) => {
 app.use("/api/healthcenter", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/refer", referRouters);
+app.use("/api/auth", authRouters);
+
 
 // --- 3. การจัดการ Port สำหรับ Local Development ---
 if (process.env.NODE_ENV !== 'production') {
