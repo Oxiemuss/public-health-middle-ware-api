@@ -28,8 +28,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/healthcenter", verifyToken, healthRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/refer", referRouters);
+app.use("/api/users", verifyToken, userRoutes);
+app.use("/api/refer", verifyToken, referRouters);
 app.use("/api/auth", authRouters);
 
 // --- 3. การจัดการ Port สำหรับ Local Development ---
@@ -39,6 +39,5 @@ if (process.env.NODE_ENV !== "production") {
     console.log(`Server is running on port ${PORT}`);
   });
 }
-
 
 module.exports = app;
